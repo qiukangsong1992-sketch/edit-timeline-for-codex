@@ -2,7 +2,7 @@
   "name": "edit-timeline-for-codex",
   "displayName": "Edit Timeline For Codex",
   "description": "在 VS Code 中查看 Codex 编辑时间线、差异与恢复记录。",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "karson1992",
   "author": { "name": "Edit Timeline For Codex Contributors" },
   "license": "MIT",
@@ -95,7 +95,7 @@
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "test": "npm run check-types && npm run lint && vitest run",
-    "package": "npm run vscode:prepublish && npx --yes @vscode/vsce package --no-dependencies --no-rewrite-relative-links --allow-missing-repository",
+    "package": "npx --yes @vscode/vsce package --no-dependencies",
     "compile:integration": "tsc -p tsconfig.integration.json",
     "test:integration": "npm run compile && npm run compile:integration && vscode-test",
     "test:all": "npm run test && npm run test:integration"

@@ -1,5 +1,9 @@
 # 更新记录
 
+## 0.1.1
+
+- 修正插件市场页面中的测试报告及衍生许可说明链接。
+
 ## 0.1.0
 
 - 创建独立的 Edit Timeline For Codex 扩展，使用 `editTimelineForCodex.*` 命令、设置和独立存储。

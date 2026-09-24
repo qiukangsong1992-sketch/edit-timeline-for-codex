@@ -1,10 +1,10 @@
 # Edit Timeline For Codex
 
-在 VS Code 中按 Codex 回合查看编辑时间线、文件差异，并恢复或撤销恢复。当前版本为 **0.1.0**，仅支持 Windows 本机：项目须在 VS Code 中打开，扩展须保持运行。
+在 VS Code 中按 Codex 回合查看编辑时间线、文件差异，并恢复或撤销恢复。当前版本为 **0.1.1**，仅支持 Windows 本机：项目须在 VS Code 中打开，扩展须保持运行。
 
 ## 安装
 
-1. 在 VS Code 扩展市场搜索 **Edit Timeline For Codex**（发布者 `karson1992`）并安装；也可以用“从 VSIX 安装”安装 `edit-timeline-for-codex-0.1.0.vsix`。安装后重新加载窗口。
+1. 在 VS Code 扩展市场搜索 **Edit Timeline For Codex**（发布者 `karson1992`）并安装；也可以用“从 VSIX 安装”安装 `edit-timeline-for-codex-0.1.1.vsix`。安装后重新加载窗口。
 2. 打开要记录的项目文件夹。多根工作区会分别扫描、关联与显示。
 3. 运行命令 **Edit Timeline For Codex: 一键配置 Hook**。扩展会检测 `CODEX_HOME`，否则使用 `%USERPROFILE%\.codex`；在该目录的 `hooks.json` 中幂等加入 `UserPromptSubmit`、`PreToolUse`、`PostToolUse` 三个命令 Hook，保留其他配置并在修改前备份。损坏的配置不会被覆盖。
 4. **重新启动 Codex**，输入 `/hooks`，检查并手动信任本插件的三个 Hook，然后发起一次编辑验证。扩展不会写入 Codex 的信任状态。参见[官方 Hook 说明](https://learn.chatgpt.com/docs/hooks)。
@@ -43,6 +43,6 @@ Hook 桥接脚本使用 VS Code 自带的 Node 运行模式，不要求另装 No
 
 ## 开发
 
-`npm run check-types`、`npm run lint`、`npm run test:unit`、`npm run test:integration` 分别运行类型、格式、单元和扩展集成检查。`npm run package` 生成 VSIX。构建与验证记录见 [测试报告](docs/TEST_REPORT.md)。
+`npm run check-types`、`npm run lint`、`npm run test:unit`、`npm run test:integration` 分别运行类型、格式、单元和扩展集成检查。`npm run package` 生成 VSIX。构建与验证记录见 [测试报告](https://github.com/qiukangsong1992-sketch/edit-timeline-for-codex/blob/main/docs/TEST_REPORT.md)。
 
-基于 Rajendra Choudhary 的 AI Changes Timeline 开发，保留其完整 MIT 许可。衍生项目和依赖说明见 [DERIVATION.md](DERIVATION.md)。
+基于 Rajendra Choudhary 的 AI Changes Timeline 开发，保留其完整 MIT 许可。衍生项目和依赖说明见 [DERIVATION.md](https://github.com/qiukangsong1992-sketch/edit-timeline-for-codex/blob/main/DERIVATION.md)。
