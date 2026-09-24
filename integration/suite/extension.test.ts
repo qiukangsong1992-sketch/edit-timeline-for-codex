@@ -7,7 +7,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { EditTimelineForCodexApi } from '../../src/extension';
 
-const EXTENSION_ID = 'local-dev.edit-timeline-for-codex';
+const EXTENSION_ID = 'karson1992.edit-timeline-for-codex';
 let api: EditTimelineForCodexApi;
 let extension: vscode.Extension<EditTimelineForCodexApi>;
 

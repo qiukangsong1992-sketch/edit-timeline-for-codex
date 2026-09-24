@@ -4,7 +4,7 @@
 
 ## 安装
 
-1. 用 VS Code 的“从 VSIX 安装”安装 `edit-timeline-for-codex-0.1.0.vsix`，重新加载窗口。
+1. 在 VS Code 扩展市场搜索 **Edit Timeline For Codex**（发布者 `karson1992`）并安装；也可以用“从 VSIX 安装”安装 `edit-timeline-for-codex-0.1.0.vsix`。安装后重新加载窗口。
 2. 打开要记录的项目文件夹。多根工作区会分别扫描、关联与显示。
 3. 运行命令 **Edit Timeline For Codex: 一键配置 Hook**。扩展会检测 `CODEX_HOME`，否则使用 `%USERPROFILE%\.codex`；在该目录的 `hooks.json` 中幂等加入 `UserPromptSubmit`、`PreToolUse`、`PostToolUse` 三个命令 Hook，保留其他配置并在修改前备份。损坏的配置不会被覆盖。
 4. **重新启动 Codex**，输入 `/hooks`，检查并手动信任本插件的三个 Hook，然后发起一次编辑验证。扩展不会写入 Codex 的信任状态。参见[官方 Hook 说明](https://learn.chatgpt.com/docs/hooks)。
