@@ -1,0 +1,22 @@
+# Runtime code, the Codex hook collector, media, and marketplace docs belong in the package.
+.vscode/**
+.vscode-test/**
+.vscode-test.mjs
+.test-workspace/**
+.test-workspace-2/**
+scripts/**
+src/**
+test/**
+integration/**
+node_modules/**
+out/**
+.gitignore
+.eslintrc.json
+esbuild.mjs
+tsconfig.json
+tsconfig.integration.json
+vitest.config.ts
+CONTRIBUTING.md
+**/*.vsix
+**/*.map
+**/*.ts

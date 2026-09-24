@@ -1,0 +1,114 @@
+{
+  "name": "edit-timeline-for-codex",
+  "displayName": "Edit Timeline For Codex",
+  "description": "在 VS Code 中查看 Codex 编辑时间线、差异与恢复记录。",
+  "version": "0.1.0",
+  "publisher": "local-dev",
+  "author": { "name": "Edit Timeline For Codex Contributors" },
+  "license": "MIT",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["SCM Providers", "Other"],
+  "keywords": ["codex", "timeline", "diff", "restore"],
+  "icon": "media/icon.png",
+  "main": "./dist/extension.js",
+  "activationEvents": ["onStartupFinished"],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [{ "id": "editTimelineForCodex", "title": "Edit Timeline For Codex", "icon": "media/activity-bar.svg" }]
+    },
+    "views": {
+      "editTimelineForCodex": [{ "id": "editTimelineForCodex.timeline", "name": "编辑时间线", "icon": "media/activity-bar.svg" }]
+    },
+    "viewsWelcome": [
+      { "view": "editTimelineForCodex.timeline", "contents": "暂无 Codex 编辑记录。\n\n请先[一键配置 Hook](command:editTimelineForCodex.installHooks)，再按信任说明启用。", "when": "!editTimelineForCodex.hasNoWorkspace" },
+      { "view": "editTimelineForCodex.timeline", "contents": "打开项目文件夹后才能采集 Codex 编辑。\n\n[打开文件夹](command:vscode.openFolder)", "when": "editTimelineForCodex.hasNoWorkspace" }
+    ],
+    "commands": [
+      { "command": "editTimelineForCodex.openTimeline", "title": "打开编辑时间线", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.compare", "title": "比较修改前后", "category": "Edit Timeline For Codex", "icon": "$(git-compare)" },
+      { "command": "editTimelineForCodex.restoreFile", "title": "恢复文件", "category": "Edit Timeline For Codex", "icon": "$(discard)" },
+      { "command": "editTimelineForCodex.restoreSession", "title": "恢复本回合全部文件", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.revealInExplorer", "title": "在资源管理器中显示", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.copyPath", "title": "复制路径", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.search", "title": "搜索记录", "category": "Edit Timeline For Codex", "icon": "$(search)" },
+      { "command": "editTimelineForCodex.clearSearch", "title": "清除筛选", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.filter", "title": "筛选记录", "category": "Edit Timeline For Codex", "icon": "$(filter)" },
+      { "command": "editTimelineForCodex.setPrompt", "title": "编辑提示词或标签", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.togglePin", "title": "置顶或取消置顶", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.mergeWithPrevious", "title": "与上一条记录合并", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.deleteSession", "title": "删除本条记录", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.showStatistics", "title": "查看统计", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.exportHistory", "title": "导出历史", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.deleteHistory", "title": "清空历史", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.refresh", "title": "刷新", "category": "Edit Timeline For Codex", "icon": "$(refresh)" },
+      { "command": "editTimelineForCodex.installHooks", "title": "一键配置 Hook", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.checkHooks", "title": "检查 Hook 状态", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.trustHelp", "title": "查看手动信任说明", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.removeHooks", "title": "移除本插件 Hook", "category": "Edit Timeline For Codex" }
+    ],
+    "menus": {
+      "view/title": [
+        { "command": "editTimelineForCodex.search", "when": "view == editTimelineForCodex.timeline", "group": "navigation@1" },
+        { "command": "editTimelineForCodex.filter", "when": "view == editTimelineForCodex.timeline", "group": "navigation@2" },
+        { "command": "editTimelineForCodex.refresh", "when": "view == editTimelineForCodex.timeline", "group": "navigation@3" },
+        { "command": "editTimelineForCodex.installHooks", "when": "view == editTimelineForCodex.timeline", "group": "1_hooks@1" },
+        { "command": "editTimelineForCodex.checkHooks", "when": "view == editTimelineForCodex.timeline", "group": "1_hooks@2" },
+        { "command": "editTimelineForCodex.showStatistics", "when": "view == editTimelineForCodex.timeline", "group": "2_data@1" },
+        { "command": "editTimelineForCodex.exportHistory", "when": "view == editTimelineForCodex.timeline", "group": "2_data@2" },
+        { "command": "editTimelineForCodex.deleteHistory", "when": "view == editTimelineForCodex.timeline", "group": "3_danger@1" }
+      ],
+      "view/item/context": [
+        { "command": "editTimelineForCodex.compare", "when": "view == editTimelineForCodex.timeline && viewItem =~ /^codexFile/", "group": "inline@1" },
+        { "command": "editTimelineForCodex.restoreFile", "when": "view == editTimelineForCodex.timeline && viewItem == codexFile.restorable", "group": "inline@2" },
+        { "command": "editTimelineForCodex.revealInExplorer", "when": "view == editTimelineForCodex.timeline && viewItem =~ /^codexFile/", "group": "1_open@1" },
+        { "command": "editTimelineForCodex.copyPath", "when": "view == editTimelineForCodex.timeline && viewItem =~ /^codexFile/", "group": "1_open@2" },
+        { "command": "editTimelineForCodex.setPrompt", "when": "view == editTimelineForCodex.timeline && viewItem =~ /^codexSession/", "group": "inline@1" },
+        { "command": "editTimelineForCodex.restoreSession", "when": "view == editTimelineForCodex.timeline && viewItem =~ /^codexSession/", "group": "2_modify@1" },
+        { "command": "editTimelineForCodex.togglePin", "when": "view == editTimelineForCodex.timeline && viewItem =~ /^codexSession/", "group": "1_session@1" },
+        { "command": "editTimelineForCodex.mergeWithPrevious", "when": "view == editTimelineForCodex.timeline && viewItem =~ /^codexSession/", "group": "1_session@2" },
+        { "command": "editTimelineForCodex.deleteSession", "when": "view == editTimelineForCodex.timeline && viewItem =~ /^codexSession/", "group": "3_danger@1" }
+      ]
+    },
+    "configuration": {
+      "title": "Edit Timeline For Codex",
+      "properties": {
+        "editTimelineForCodex.maxHistorySessions": { "type": "number", "default": 500, "minimum": 1, "description": "每个工作区最多保留的未置顶记录数。" },
+        "editTimelineForCodex.autoCleanupDays": { "type": "number", "default": 30, "minimum": 0, "description": "未置顶记录保留天数；0 表示关闭按天清理。" },
+        "editTimelineForCodex.maxStorageBytes": { "type": "number", "default": 536870912, "minimum": 1048576, "description": "每个工作区的快照存储容量上限（字节）。" },
+        "editTimelineForCodex.maxSnapshotBytes": { "type": "number", "default": 1048576, "minimum": 1024, "description": "单文件文本快照大小上限（字节）。" },
+        "editTimelineForCodex.storePrompts": { "type": "boolean", "default": true, "description": "保存 Hook 提供的提示词。" },
+        "editTimelineForCodex.enableStatistics": { "type": "boolean", "default": true, "description": "后台统计增删行数。" },
+        "editTimelineForCodex.showStatusBar": { "type": "boolean", "default": true, "description": "显示最后一次 Codex 编辑的状态栏提示。" },
+        "editTimelineForCodex.exclude": { "type": "array", "items": { "type": "string" }, "default": ["**/node_modules/**", "**/.git/**", "**/dist/**", "**/build/**", "**/out/**", "**/target/**", "**/.venv/**", "**/venv/**", "**/__pycache__/**", "**/.next/**", "**/.nuxt/**", "**/coverage/**", "**/.cache/**", "**/.idea/**"], "description": "采集时排除的目录或 glob；锁文件和项目文档默认采集。" }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run check-types && node esbuild.mjs --production",
+    "compile": "npm run check-types && node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src --ext ts",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "test": "npm run check-types && npm run lint && vitest run",
+    "package": "npm run vscode:prepublish && npx --yes @vscode/vsce package --no-dependencies --no-rewrite-relative-links --allow-missing-repository",
+    "compile:integration": "tsc -p tsconfig.integration.json",
+    "test:integration": "npm run compile && npm run compile:integration && vscode-test",
+    "test:all": "npm run test && npm run test:integration"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.11.30",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.20.2",
+    "eslint": "^8.57.0",
+    "mocha": "^10.8.2",
+    "typescript": "^5.4.3",
+    "vitest": "^1.4.0"
+  }
+}
