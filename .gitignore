@@ -5,7 +5,5 @@ out/
 .vscode-test/
 coverage/
 .DS_Store
-.test-workspace/*
-!.test-workspace/.gitkeep
-.test-workspace-2/*
-!.test-workspace-2/.gitkeep
+.test-workspace/
+.test-workspace-2/

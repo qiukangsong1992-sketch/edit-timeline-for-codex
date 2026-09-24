@@ -1,5 +1,7 @@
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@vscode/test-cli';
 
 /**
@@ -9,6 +11,9 @@ import { defineConfig } from '@vscode/test-cli';
  * its profile in a short temporary directory rather than under the repo.
  */
 const profileDir = join(tmpdir(), 'aict');
+const projectDir = dirname(fileURLToPath(import.meta.url));
+mkdirSync(join(projectDir, '.test-workspace'), { recursive: true });
+mkdirSync(join(projectDir, '.test-workspace-2'), { recursive: true });
 
 export default defineConfig({
   label: 'integration',
