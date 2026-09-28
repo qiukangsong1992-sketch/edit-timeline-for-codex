@@ -2,7 +2,7 @@
   "name": "edit-timeline-for-codex",
   "displayName": "Edit Timeline For Codex",
   "description": "在 VS Code 中查看 Codex 编辑时间线、差异与恢复记录。",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "karson1992",
   "author": { "name": "Edit Timeline For Codex Contributors" },
   "license": "MIT",
@@ -59,7 +59,8 @@
         { "command": "editTimelineForCodex.checkHooks", "when": "view == editTimelineForCodex.timeline", "group": "1_hooks@2" },
         { "command": "editTimelineForCodex.removeHooks", "when": "view == editTimelineForCodex.timeline", "group": "1_hooks@3" },
         { "command": "editTimelineForCodex.showStatistics", "when": "view == editTimelineForCodex.timeline", "group": "2_data@1" },
-        { "command": "editTimelineForCodex.deleteAllHistory", "when": "view == editTimelineForCodex.timeline", "group": "3_danger@1" }
+        { "command": "editTimelineForCodex.deleteHistory", "when": "view == editTimelineForCodex.timeline", "group": "3_danger@1" },
+        { "command": "editTimelineForCodex.deleteAllHistory", "when": "view == editTimelineForCodex.timeline", "group": "3_danger@2" }
       ],
       "view/item/context": [
         { "command": "editTimelineForCodex.compare", "when": "view == editTimelineForCodex.timeline && viewItem =~ /^codexFile/", "group": "inline@1" },

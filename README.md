@@ -1,10 +1,10 @@
 # Edit Timeline For Codex
 
-在 VS Code 中按 Codex 回合查看编辑时间线、文件差异，并恢复或撤销恢复。当前版本为 **0.1.2**，仅支持 Windows 本机：项目须在 VS Code 中打开，扩展须保持运行。
+在 VS Code 中按 Codex 回合查看编辑时间线、文件差异，并恢复或撤销恢复。当前版本为 **0.1.3**，仅支持 Windows 本机：项目须在 VS Code 中打开，扩展须保持运行。
 
 ## 安装
 
-1. 在 VS Code 扩展市场搜索 **Edit Timeline For Codex**（发布者 `karson1992`）并安装；也可以用“从 VSIX 安装”安装 `edit-timeline-for-codex-0.1.2.vsix`。安装后重新加载窗口。
+1. 在 VS Code 扩展市场搜索 **Edit Timeline For Codex**（发布者 `karson1992`）并安装；也可以用“从 VSIX 安装”安装 `edit-timeline-for-codex-0.1.3.vsix`。安装后重新加载窗口。
 2. 打开要记录的项目文件夹。多根工作区会分别扫描、关联与显示。
 3. 运行命令 **Edit Timeline For Codex: 一键配置 Hook**。扩展会检测 `CODEX_HOME`，否则使用 `%USERPROFILE%\.codex`；在该目录的 `hooks.json` 中幂等加入 `UserPromptSubmit`、`PreToolUse`、`PostToolUse` 三个命令 Hook，保留其他配置并在修改前备份。损坏的配置不会被覆盖。
 4. **重新启动 Codex**，输入 `/hooks`，检查并手动信任本插件的三个 Hook，然后发起一次编辑验证。扩展不会写入 Codex 的信任状态。参见[官方 Hook 说明](https://learn.chatgpt.com/docs/hooks)。
@@ -31,7 +31,7 @@ Hook 桥接脚本使用 VS Code 自带的 Node 运行模式，不要求另装 No
 
 快照按内容哈希去重并保存在 VS Code 的扩展工作区存储目录，与原项目历史隔离；不会自动迁移旧数据。默认总容量 512 MiB，最多保留 500 条未置顶记录和 30 天未置顶历史。置顶记录受保护。容量接近上限时先清理最旧未置顶记录；仍无法保存的变化只记录路径并说明原因。历史变更提交后才清理失去引用的快照；扩展启动后也会延迟校验实际引用次数并清除孤立文件。
 
-右上角菜单的“清空所有工作区历史”会立即删除本插件在所有工作区中的快照。当前及其他已打开窗口会同步清除记录索引；未打开工作区的索引会在下次打开时清除。
+右上角菜单同时保留“清空当前工作区历史”和“清空所有工作区历史”。后者会立即删除本插件在所有工作区中的快照；当前及其他已打开窗口会同步清除记录索引，未打开工作区的索引会在下次打开时清除。
 
 在 VS Code 设置中搜索 `editTimelineForCodex` 可调整容量、天数、条数、单文件上限与排除目录。默认排除依赖、构建产物和缓存目录；**锁文件和项目文档默认会记录**。关闭或调整排除项后在下一次 Hook 采集生效。
 

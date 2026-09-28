@@ -76,6 +76,7 @@ suite('Edit Timeline For Codex 扩展集成', () => {
     const titleMenu = extension.packageJSON.contributes.menus['view/title'] as { command: string }[];
     const titleCommands = titleMenu.map((item) => item.command);
     assert.ok(titleCommands.includes('editTimelineForCodex.removeHooks'));
+    assert.ok(titleCommands.includes('editTimelineForCodex.deleteHistory'));
     assert.ok(titleCommands.includes('editTimelineForCodex.deleteAllHistory'));
     assert.ok(!titleCommands.includes('editTimelineForCodex.exportHistory'));
   });
