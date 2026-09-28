@@ -211,6 +211,22 @@ async function reconcile(refs) {
   return Object.fromEntries(counts);
 }
 
+async function clearSnapshots() {
+  pending.clear();
+  caches.clear();
+  bodyCache.clear();
+  statsCache.clear();
+  bodyBytes = 0;
+  await fs.mkdir(storeDir, { recursive: true });
+  for (const name of await fs.readdir(storeDir)) {
+    if (/^[a-f0-9]{64}$/.test(name) || name === 'index.json' || /^index-.*\.tmp$/.test(name)) {
+      await fs.unlink(path.join(storeDir, name)).catch(() => {});
+    }
+  }
+  usedBytes = 0;
+  return true;
+}
+
 async function handle(method, args) {
   if (method === 'metrics') return { ...metrics, workerHeapBytes: process.memoryUsage().heapUsed, pendingTools: pending.size };
   if (method === 'resetMetrics') {
@@ -294,6 +310,7 @@ async function handle(method, args) {
   if (method === 'put') return put(args.text, args.limitBytes);
   if (method === 'usage') return diskUsage();
   if (method === 'reconcile') return reconcile(args.refs);
+  if (method === 'clearSnapshots') return clearSnapshots();
   if (method === 'expire') {
     const now = args.now || Date.now();
     for (const [key, value] of pending) if (now - value.at > 86400000) pending.delete(key);

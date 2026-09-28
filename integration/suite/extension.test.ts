@@ -73,6 +73,11 @@ suite('Edit Timeline For Codex 扩展集成', () => {
     const registered = new Set(await vscode.commands.getCommands(true));
     const contributed = extension.packageJSON.contributes.commands as { command: string }[];
     assert.deepEqual(contributed.filter((item) => !registered.has(item.command)), []);
+    const titleMenu = extension.packageJSON.contributes.menus['view/title'] as { command: string }[];
+    const titleCommands = titleMenu.map((item) => item.command);
+    assert.ok(titleCommands.includes('editTimelineForCodex.removeHooks'));
+    assert.ok(titleCommands.includes('editTimelineForCodex.deleteAllHistory'));
+    assert.ok(!titleCommands.includes('editTimelineForCodex.exportHistory'));
   });
 
   test('没有 Hook 时人工保存不生成记录', async () => {
@@ -161,13 +166,28 @@ suite('Edit Timeline For Codex 扩展集成', () => {
     process.env.CODEX_HOME = temporary;
     try {
       const file = path.join(temporary, 'hooks.json');
-      await fs.writeFile(file, JSON.stringify({ hooks: { SessionStart: [{ hooks: [{ type: 'command', command: 'echo other' }] }] } }), 'utf8');
+      const stale = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\\Users\\test\\AppData\\Roaming\\Code\\User\\globalStorage\\local-dev.edit-timeline-for-codex\\EditTimelineForCodex-hook.ps1"';
+      await fs.writeFile(file, JSON.stringify({
+        hooks: {
+          SessionStart: [{ hooks: [{ type: 'command', command: 'echo other' }] }],
+          UserPromptSubmit: [{ hooks: [{ type: 'command', command: stale, timeout: 15 }] }],
+          PreToolUse: [{ hooks: [{ type: 'command', command: stale, timeout: 15 }] }],
+          PostToolUse: [{ hooks: [{ type: 'command', command: stale, timeout: 15 }] }],
+        },
+      }), 'utf8');
       await vscode.commands.executeCommand('editTimelineForCodex.installHooks');
       const first = await fs.readFile(file, 'utf8');
       await vscode.commands.executeCommand('editTimelineForCodex.installHooks');
       assert.equal(await fs.readFile(file, 'utf8'), first);
       const installed = JSON.parse(first);
       assert.deepEqual(Object.keys(installed.hooks).sort(), ['PostToolUse', 'PreToolUse', 'SessionStart', 'UserPromptSubmit'].sort());
+      for (const eventName of ['UserPromptSubmit', 'PreToolUse', 'PostToolUse']) {
+        const handlers = installed.hooks[eventName].flatMap((group: { hooks: { command?: string; timeout?: number }[] }) => group.hooks);
+        assert.equal(handlers.length, 1);
+        assert.equal(handlers[0].timeout, 15);
+        assert.match(handlers[0].command, /karson1992\.edit-timeline-for-codex/i);
+        assert.doesNotMatch(handlers[0].command, /local-dev\.edit-timeline-for-codex/i);
+      }
       await vscode.commands.executeCommand('editTimelineForCodex.removeHooks');
       assert.deepEqual(Object.keys(JSON.parse(await fs.readFile(file, 'utf8')).hooks), ['SessionStart']);
     } finally {

@@ -2,7 +2,7 @@
   "name": "edit-timeline-for-codex",
   "displayName": "Edit Timeline For Codex",
   "description": "在 VS Code 中查看 Codex 编辑时间线、差异与恢复记录。",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "karson1992",
   "author": { "name": "Edit Timeline For Codex Contributors" },
   "license": "MIT",
@@ -42,12 +42,13 @@
       { "command": "editTimelineForCodex.deleteSession", "title": "删除本条记录", "category": "Edit Timeline For Codex" },
       { "command": "editTimelineForCodex.showStatistics", "title": "查看统计", "category": "Edit Timeline For Codex" },
       { "command": "editTimelineForCodex.exportHistory", "title": "导出历史", "category": "Edit Timeline For Codex" },
-      { "command": "editTimelineForCodex.deleteHistory", "title": "清空历史", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.deleteHistory", "title": "清空当前工作区历史", "category": "Edit Timeline For Codex" },
+      { "command": "editTimelineForCodex.deleteAllHistory", "title": "清空所有工作区历史", "category": "Edit Timeline For Codex" },
       { "command": "editTimelineForCodex.refresh", "title": "刷新", "category": "Edit Timeline For Codex", "icon": "$(refresh)" },
       { "command": "editTimelineForCodex.installHooks", "title": "一键配置 Hook", "category": "Edit Timeline For Codex" },
       { "command": "editTimelineForCodex.checkHooks", "title": "检查 Hook 状态", "category": "Edit Timeline For Codex" },
       { "command": "editTimelineForCodex.trustHelp", "title": "查看手动信任说明", "category": "Edit Timeline For Codex" },
-      { "command": "editTimelineForCodex.removeHooks", "title": "移除本插件 Hook", "category": "Edit Timeline For Codex" }
+      { "command": "editTimelineForCodex.removeHooks", "title": "一键移除 Hook", "category": "Edit Timeline For Codex" }
     ],
     "menus": {
       "view/title": [
@@ -56,9 +57,9 @@
         { "command": "editTimelineForCodex.refresh", "when": "view == editTimelineForCodex.timeline", "group": "navigation@3" },
         { "command": "editTimelineForCodex.installHooks", "when": "view == editTimelineForCodex.timeline", "group": "1_hooks@1" },
         { "command": "editTimelineForCodex.checkHooks", "when": "view == editTimelineForCodex.timeline", "group": "1_hooks@2" },
+        { "command": "editTimelineForCodex.removeHooks", "when": "view == editTimelineForCodex.timeline", "group": "1_hooks@3" },
         { "command": "editTimelineForCodex.showStatistics", "when": "view == editTimelineForCodex.timeline", "group": "2_data@1" },
-        { "command": "editTimelineForCodex.exportHistory", "when": "view == editTimelineForCodex.timeline", "group": "2_data@2" },
-        { "command": "editTimelineForCodex.deleteHistory", "when": "view == editTimelineForCodex.timeline", "group": "3_danger@1" }
+        { "command": "editTimelineForCodex.deleteAllHistory", "when": "view == editTimelineForCodex.timeline", "group": "3_danger@1" }
       ],
       "view/item/context": [
         { "command": "editTimelineForCodex.compare", "when": "view == editTimelineForCodex.timeline && viewItem =~ /^codexFile/", "group": "inline@1" },

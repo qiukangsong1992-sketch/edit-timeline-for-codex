@@ -29,7 +29,8 @@ export class WorkerSnapshots implements SnapshotStore {
   }
 
   async clear(): Promise<void> {
-    await this.reconcile([]);
+    await this.worker.request('clearSnapshots', {});
+    this.fresh.clear();
   }
 
   async reconcile(historyRefs: string[]): Promise<Record<string, number>> {

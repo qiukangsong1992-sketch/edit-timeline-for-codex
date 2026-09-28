@@ -89,6 +89,20 @@ describe('Hook 扫描 worker', () => {
     expect(await request('get', { ref })).toBeUndefined();
   });
 
+  test('显式清空会释放缓存、待配对工具和全部快照', async () => {
+    const file = path.join(root, 'pending.txt');
+    await fs.writeFile(file, '修改前', 'utf8');
+    const ref = await request<string>('put', { text: '历史正文', limitBytes: 1024 * 1024 });
+    await request('pre', { root, key: 'pending', targets: [file], settings, budgetMs: 10000 });
+    expect((await request<{ pendingTools: number }>('metrics', {})).pendingTools).toBe(1);
+
+    await request('clearSnapshots', {});
+
+    expect(await request('get', { ref })).toBeUndefined();
+    expect((await request<{ pendingTools: number }>('metrics', {})).pendingTools).toBe(0);
+    expect(await request('usage', {})).toBe(0);
+  });
+
   test('快照读取只接受内容哈希引用', async () => {
     expect(await request('get', { ref: '../index.json' })).toBeUndefined();
   });

@@ -15,6 +15,7 @@ export interface CommandDeps {
   view: TimelineView;
   treeView: vscode.TreeView<TimelineNode>;
   refresh: () => void;
+  clearAllHistory: () => Promise<number>;
   log: (message: string) => void;
 }
 
@@ -181,6 +182,18 @@ export function registerCommands(deps: CommandDeps): vscode.Disposable[] {
         deps.refresh();
         void vscode.window.showInformationMessage('历史记录已清空。');
       }
+    }),
+
+    register('editTimelineForCodex.deleteAllHistory', async () => {
+      const confirmed = await confirm(
+        '清空所有工作区的编辑历史？',
+        '所有工作区的快照会立即删除；未打开工作区的记录索引会在下次打开时清除。此操作无法撤销，工作区文件不受影响。',
+        '清空所有工作区历史',
+      );
+      if (!confirmed) return;
+      const removed = await deps.clearAllHistory();
+      deps.refresh();
+      void vscode.window.showInformationMessage(`所有工作区历史已清空，共删除 ${removed} 个快照存储文件。`);
     }),
   ];
 }

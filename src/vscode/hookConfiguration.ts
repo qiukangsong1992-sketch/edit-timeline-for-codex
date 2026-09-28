@@ -24,7 +24,16 @@ function commandFor(launcher: string): string {
 }
 
 function owned(handler: HookHandler): boolean {
-  return handler.type === 'command' && typeof handler.command === 'string' && handler.command.includes(LAUNCHER_NAME);
+  return handler.type === 'command'
+    && typeof handler.command === 'string'
+    && handler.command.toLowerCase().includes(LAUNCHER_NAME.toLowerCase());
+}
+
+function configured(handler: HookHandler, launcher: string): boolean {
+  return handler.type === 'command'
+    && handler.timeout === 15
+    && typeof handler.command === 'string'
+    && handler.command.trim().toLowerCase() === commandFor(launcher).toLowerCase();
 }
 
 async function readConfig(): Promise<HookFile> {
@@ -84,8 +93,14 @@ export async function installHooks(context: vscode.ExtensionContext): Promise<bo
   if (!root) throw new Error('请先在 VS Code 中打开本机项目文件夹');
   const config = await readConfig();
   const launcher = path.join(context.globalStorageUri.fsPath, LAUNCHER_NAME);
+  const expectedLauncher = `\uFEFF${launcherText(process.execPath, context.asAbsolutePath(path.join('hook', 'bridge.cjs')))}`;
+  const currentLauncher = await fs.readFile(launcher, 'utf8').catch((error: NodeJS.ErrnoException) => {
+    if (error.code === 'ENOENT') return undefined;
+    throw error;
+  });
+  const launcherChanged = currentLauncher !== expectedLauncher;
   await fs.mkdir(path.dirname(launcher), { recursive: true });
-  await fs.writeFile(launcher, `\uFEFF${launcherText(process.execPath, context.asAbsolutePath(path.join('hook', 'bridge.cjs')))}`, 'utf8');
+  if (launcherChanged) await fs.writeFile(launcher, expectedLauncher, 'utf8');
   await new Promise<void>((resolve, reject) => {
     const child = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', launcher, '--pipe-self-test'], {
       cwd: root,
@@ -101,22 +116,51 @@ export async function installHooks(context: vscode.ExtensionContext): Promise<bo
     child.on('close', (code) => code === 0 && stdout.trim() === 'ok' ? resolve() : reject(new Error(`启动器或命名管道自检失败：${code} ${stderr.trim()}`)));
   });
   config.hooks ??= {};
-  let changed = false;
+  let changed = launcherChanged;
   for (const event of EVENTS) {
     const groups = config.hooks[event] ?? [];
     if (!Array.isArray(groups)) throw new Error(`${event} 配置格式无效，原文件未修改`);
-    if (groups.some((group) => Array.isArray(group.hooks) && group.hooks.some(owned))) continue;
-    groups.push({ hooks: [{ type: 'command', command: commandFor(launcher), timeout: 15 }] });
-    config.hooks[event] = groups;
-    changed = true;
+    let foundCurrent = false;
+    const updated = groups.map((group) => {
+      if (!Array.isArray(group.hooks)) return group;
+      const hooks = group.hooks.filter((handler) => {
+        if (configured(handler, launcher) && !foundCurrent) {
+          foundCurrent = true;
+          return true;
+        }
+        if (owned(handler)) {
+          changed = true;
+          return false;
+        }
+        return true;
+      });
+      return hooks.length === group.hooks.length ? group : { ...group, hooks };
+    }).filter((group) => group.hooks === undefined || group.hooks.length > 0);
+    if (!foundCurrent) {
+      updated.push({ hooks: [{ type: 'command', command: commandFor(launcher), timeout: 15 }] });
+      changed = true;
+    }
+    config.hooks[event] = updated;
   }
-  if (changed) await writeConfig(config);
+  if (changed && config.hooks) await writeConfig(config);
   return changed;
 }
 
-export async function hookStatus(): Promise<Record<string, boolean>> {
+export async function hookStatus(context: vscode.ExtensionContext): Promise<Record<string, boolean>> {
   const config = await readConfig();
-  return Object.fromEntries(EVENTS.map((event) => [event, Boolean(config.hooks?.[event]?.some((group) => group.hooks?.some(owned)))]));
+  const launcher = path.join(context.globalStorageUri.fsPath, LAUNCHER_NAME);
+  const expectedLauncher = `\uFEFF${launcherText(process.execPath, context.asAbsolutePath(path.join('hook', 'bridge.cjs')))}`;
+  const launcherReady = await fs.readFile(launcher, 'utf8').then(
+    (text) => text === expectedLauncher,
+    (error: NodeJS.ErrnoException) => {
+      if (error.code === 'ENOENT') return false;
+      throw error;
+    },
+  );
+  return Object.fromEntries(EVENTS.map((event) => [
+    event,
+    launcherReady && Boolean(config.hooks?.[event]?.some((group) => group.hooks?.some((handler) => configured(handler, launcher)))),
+  ]));
 }
 
 export async function removeHooks(): Promise<boolean> {

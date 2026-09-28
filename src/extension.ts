@@ -5,6 +5,7 @@ import { SessionHistoryStore } from './core/historyStore';
 import { RestoreService, type RestoreReport } from './core/restore';
 import type { AISession } from './core/types';
 import { MementoStore, VsCodeWorkspaceWriter } from './vscode/adapters';
+import { AllHistoryCleanup } from './vscode/allHistoryCleanup';
 import { registerCommands } from './vscode/commands';
 import { readSettings } from './vscode/config';
 import { SNAPSHOT_SCHEME, SnapshotContentProvider } from './vscode/diffProvider';
@@ -41,7 +42,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<EditTi
     vscode.commands.registerCommand('editTimelineForCodex.checkHooks', async () => {
       try {
         await checkRuntime(context);
-        const status = await hookStatus();
+        const status = await hookStatus(context);
         void vscode.window.showInformationMessage(Object.entries(status).map(([name, installed]) => `${name}：${installed ? '已配置' : '未配置'}`).join('；'));
       } catch (error) { void vscode.window.showErrorMessage(`Hook 检查失败：${describe(error)}`); }
     }),
@@ -80,7 +81,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<EditTi
   const recorder = new HookRecorder(roots, worker, history, readSettings, (refs) => snapshots.reconcile(refs), log);
   const receiver = new HookReceiver(roots, (event) => recorder.handle(event), log);
   context.subscriptions.push(receiver);
-  try { await receiver.start(); } catch (error) { log(`命名管道启动失败：${describe(error)}`); }
 
   const restore = new RestoreService({
     history,
@@ -151,14 +151,35 @@ export async function activate(context: vscode.ExtensionContext): Promise<EditTi
       }).catch((error: unknown) => log(`快照清理失败：${describe(error)}`));
     }, 1000);
   };
+  const allHistoryCleanup = new AllHistoryCleanup(
+    context,
+    () => recorder.maintenance(async () => {
+      await history.clear();
+      await snapshots.clear();
+      refresh();
+    }),
+    log,
+  );
   context.subscriptions.push(
+    allHistoryCleanup,
     history.onDidChangeHistory((id) => { refresh(id); cleanup(); }),
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration('editTimelineForCodex')) { refresh(); cleanup(); }
     }),
     { dispose: () => { if (refreshTimer) clearTimeout(refreshTimer); if (cleanupTimer) clearTimeout(cleanupTimer); } },
-    ...registerCommands({ root, history, restore, view, treeView, refresh, log }),
+    ...registerCommands({
+      root,
+      history,
+      restore,
+      view,
+      treeView,
+      refresh,
+      clearAllHistory: () => allHistoryCleanup.clearAll(),
+      log,
+    }),
   );
+  await allHistoryCleanup.start();
+  try { await receiver.start(); } catch (error) { log(`命名管道启动失败：${describe(error)}`); }
   refresh();
   cleanup();
   log('Edit Timeline For Codex 已启动');
